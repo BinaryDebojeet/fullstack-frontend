@@ -48,10 +48,9 @@ export default function Home() {
             className="flex-1 px-5 py-3 rounded-l-xl bg-slate-100 text-gray-800 placeholder-gray-500 font-medium focus:outline-none focus:ring-2 focus:ring-purple-400 border border-slate-200 transition"
           />
           <button
-            onClick={() => navigate('/saved')}
             className="px-6 py-3 bg-blue-400 text-white font-bold rounded-r-xl shadow hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
           >
-            Saved
+            Search
           </button>
         </div>
         <button
@@ -61,10 +60,7 @@ export default function Home() {
           View Saved Funds
         </button>
         {loading && <p className="text-gray-700 font-medium animate-pulse">Loading...</p>}
-        {!loading && query && funds.length === 0 && (
-          <p className="text-gray-500 text-center text-lg font-medium">No results found</p>
-        )}
-        {!loading && !query && (
+        {!loading && funds.length === 0 && (
           <p className="text-gray-500 text-center text-lg font-medium">No results yet</p>
         )}
         {!loading && funds.length > 0 && (
