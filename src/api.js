@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with your backend base URL
 const API = axios.create({
-  baseURL: 'https://fullstack-assignment-1-900s.onrender.com',
+ baseURL: 'https://fullstack-assignment-1-900s.onrender.com/api',
 });
 
 // Add token automatically to every request if available
