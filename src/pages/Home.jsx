@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import MFAPI from '../apiMF';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,31 +8,38 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchFunds = async () => {
-      if (!query) {
-        setFunds([]);
-        return;
-      }
-      
-      setLoading(true);
-      try {
-        const res = await MFAPI.get('/mf');
-        const allFunds = res.data;
-        const filtered = allFunds.filter(fund =>
-          fund.schemeName.toLowerCase().includes(query.toLowerCase())
-        );
-        setFunds(filtered);
-      } catch (err) {
-        console.error(err);
-        alert('Error fetching data');
-      }
-      setLoading(false);
-    };
+  const fetchFunds = async () => {
+    if (!query || query.length < 3) {
+      setFunds([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await MFAPI.get('/mf');
+      const allFunds = res.data;
+      setFunds(allFunds);
+    } catch (err) {
+      console.error(err);
+      alert('Error fetching data');
+    }
+    setLoading(false);
+  };
 
-    const timeoutId = setTimeout(fetchFunds, 300); // Debounce for 300ms
+  useEffect(() => {
+    const timeoutId = setTimeout(fetchFunds, 500);
     return () => clearTimeout(timeoutId);
   }, [query]);
+
+  const handleSearch = () => {
+    fetchFunds(); // Reuse the same fetch logic as useEffect
+  };
+
+  const filteredFunds = useMemo(() => {
+    if (!query || query.length < 3) return [];
+    return funds.filter(fund =>
+      fund.schemeName.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [funds, query]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200 flex flex-col items-center justify-start py-16 px-4">
@@ -48,6 +55,7 @@ export default function Home() {
             className="flex-1 px-5 py-3 rounded-l-xl bg-slate-100 text-gray-800 placeholder-gray-500 font-medium focus:outline-none focus:ring-2 focus:ring-purple-400 border border-slate-200 transition"
           />
           <button
+            onClick={handleSearch}
             className="px-6 py-3 bg-blue-400 text-white font-bold rounded-r-xl shadow hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
           >
             Search
@@ -60,12 +68,12 @@ export default function Home() {
           View Saved Funds
         </button>
         {loading && <p className="text-gray-700 font-medium animate-pulse">Loading...</p>}
-        {!loading && funds.length === 0 && (
+        {!loading && filteredFunds.length === 0 && (
           <p className="text-gray-500 text-center text-lg font-medium">No results yet</p>
         )}
-        {!loading && funds.length > 0 && (
+        {!loading && filteredFunds.length > 0 && (
           <ul className="w-full space-y-4">
-            {funds.map(fund => (
+            {filteredFunds.map(fund => (
               <li
                 key={fund.schemeCode}
                 className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-100 via-pink-100 to-blue-100 rounded-xl border border-slate-200 shadow hover:shadow-lg transition-all duration-200 cursor-pointer font-semibold text-gray-800"
